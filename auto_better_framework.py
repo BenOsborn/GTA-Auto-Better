@@ -9,6 +9,32 @@ def relud(x):
     else:
         return float(1)
 
+def classification(image_pixels, weights1, bias1, weights2, bias2, weights3, bias3):
+
+    arranged_pixels = []
+    for h in range(2):
+        for w in range(4):
+            square = []
+            for ph in range(25):
+                for pw in range(25):
+                    square.append(image_pixels[h*25 + ph][w*25 + pw])
+            arranged_pixels.append(square)
+
+    first_layer = []
+    for i in range(8):
+        resultant = float( np.dot(arranged_pixels[i], weights1[i]) + bias1[0] )
+        first_layer.append(relu(resultant))
+
+    second_layer = []
+    for i in range(16):
+        resultant = float( np.dot(first_layer, weights2[i]) + bias2[0] )
+        second_layer.append(relu(resultant))
+
+    resultant = float( np.dot(second_layer, weights3) + bias3[0] )
+    output = relu(resultant)
+
+    return output
+
 def classification_for_training(image_pixels, weights1, bias1, weights2, bias2, weights3, bias3):
 
     arranged_pixels = []
@@ -65,5 +91,3 @@ def training(image_pixels, weights1, bias1, weights2, bias2, weights3, bias3, le
                 for c in range(625):
                     weights1[b][c] = weights1old[b][c] - -learning_rate*2*(correct - out[5])*relud(out[6])*weights3old[a]*relud(out[4][a])*weights2old[a][b]*relud(out[2][b])*out[0][b][c]
                 bias1[0] = bias1old[0] - -learning_rate*2*(correct - out[5])*relud(out[6])*weights3old[a]*relud(out[4][a])*weights2old[a][b]*relud(out[2][b])
-
-#training(img_pixels, weight_set1, b1, weight_set2, b2, weight_set3, b3, 0.5, 1)

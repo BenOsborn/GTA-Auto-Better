@@ -1,11 +1,9 @@
 import pyautogui as gui
 from pynput.keyboard import Key, Listener
 
-img = gui.screenshot(region=(175, 700, 100, 50))
-
 i = [1]
 
-def screenshot(key):
+def screenshot(key): #What is this please fix
 
     if str(key)[1] == "c":
 
@@ -31,5 +29,6 @@ def screenshot(key):
     else:
         pass
 
-with Listener(on_press=screenshot) as listener:
-    listener.join()
+if __name__ == "__main__":
+    with Listener(on_press=screenshot) as listener:
+        listener.join()
