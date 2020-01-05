@@ -29,6 +29,5 @@ def screenshot(key): #What is this please fix
     else:
         pass
 
-if __name__ == "__main__":
-    with Listener(on_press=screenshot) as listener:
-        listener.join()
+with Listener(on_press=screenshot) as listener:
+    listener.join()
