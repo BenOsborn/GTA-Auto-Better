@@ -1,32 +1,27 @@
 import pyautogui as gui
 from pynput.keyboard import Key, Listener
+import os
 
-i = [1]
+numbers = []
+for files in os.walk(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\training_data"):
+    for file in files[2]:
+        numbers.append(int(file[1:-4]))
+numbers.sort()
 
-def screenshot(key): #What is this please fix
+i = [numbers[-1] + 1]
+
+def screenshot(key):
 
     if str(key)[1] == "c":
 
-        img = gui.screenshot(region=(175, 340, 100, 50))
-        img.save(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\training_data\n" + str(i[0]) + ".jpg")
-        i[0] += 1
-        img = gui.screenshot(region=(175, 460, 100, 50))
-        img.save(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\training_data\n" + str(i[0])  + ".jpg")
-        i[0] += 1
-        img = gui.screenshot(region=(175, 580, 100, 50))
-        img.save(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\training_data\n" + str(i[0])  + ".jpg")
-        i[0] += 1
-        img = gui.screenshot(region=(175, 700, 100, 50))
-        img.save(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\training_data\n" + str(i[0])  + ".jpg")
-        i[0] += 1
-        img = gui.screenshot(region=(175, 820, 100, 50))
-        img.save(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\training_data\n" + str(i[0])  + ".jpg")
-        i[0] += 1
-        img = gui.screenshot(region=(175, 940, 100, 50))
-        img.save(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\training_data\n" + str(i[0])  + ".jpg")
-        i[0] += 1
+        for a in range(6):
+
+            img = gui.screenshot(region=(175, 340 + 120*a, 100, 50))
+            img.save(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\training_data\n" + str(i[0]) + ".jpg")
+            i[0] += 1
 
     else:
+
         pass
 
 with Listener(on_press=screenshot) as listener:

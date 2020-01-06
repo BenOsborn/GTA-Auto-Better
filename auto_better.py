@@ -2,21 +2,9 @@ import pyautogui as gui
 from PIL import Image, ImageOps
 from time import sleep
 import numpy as np
-from auto_better_framework import classification
 from pynput.mouse import Button, Controller
 
 mouse = Controller()
-
-weight_set1 = []
-for _ in range(8):
-    weight_set1.append(np.random.uniform(size=625))
-b1 = [np.random.uniform(size=1)]
-weight_set2 = []
-for _ in range(16):
-    weight_set2.append(np.random.uniform(size=8))
-b2 = [np.random.uniform(size=1)]
-weight_set3 = np.random.uniform(size=16)
-b3 = [np.random.uniform(size=1)]
 
 def auto_bet(x_dimension, y_dimension):
     mouse.position = (x_dimension, y_dimension)
@@ -50,7 +38,7 @@ def main(weights1, bias1, weights2, bias2, weights3, bias3):
 
     horse = {}
     for h in range(6):
-        horse[h + 1] = round(classification(images[h], weights1, bias1, weights2, bias2, weights3, bias3), 0)
+        horse[h + 1] = round(classification(images[h], weights1, bias1, weights2, bias2, weights3, bias3)*100, 0)
 
     horse_sorted = sorted(horse.items(), key = lambda t:t[1])
 
