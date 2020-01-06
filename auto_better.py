@@ -38,7 +38,7 @@ def main(weights1, bias1, weights2, bias2, weights3, bias3):
 
     horse = {}
     for h in range(6):
-        horse[h + 1] = round(classification(images[h], weights1, bias1, weights2, bias2, weights3, bias3)*100, 0)
+        horse[h + 1] = round(classification(images[h], weights1, bias1, weights2, bias2, weights3, bias3), 0)
 
     horse_sorted = sorted(horse.items(), key = lambda t:t[1])
 

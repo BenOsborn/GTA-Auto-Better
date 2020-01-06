@@ -1,4 +1,4 @@
-from auto_better_framework import training
+from auto_better_framework import training, classification, classification_for_training
 from PIL import Image, ImageOps
 import numpy as np
 import os
@@ -20,21 +20,22 @@ for files in os.walk(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\trainin
     for file in files[2]:
         image_files.append(file)
 
-classified = [26, 20, 3, 12, 5, 7, 3, 6, 26, 12, 4, 24, 15, 12, 21, 29, 1, 1, 4, 1, 27, 12, 21, 9, 16, 5, 4, 9, 12, 23, 17, 4, 4, 14, 8, 26, 22, 9, 2, 4, 9, 25, 7, 7, 25, 4, 24, 1]
+classified = [0.26, 0.20, 0.3, 0.12, 0.5, 0.7, 0.3, 0.6, 0.26, 0.12, 0.4, 0.24, 0.15, 0.12, 0.21, 0.29, 0.1, 0.1, 0.4, 0.1, 0.27, 0.12, 0.21, 0.9, 0.16, 0.5, 0.4, 0.9, 0.12, 0.23, 0.17, 0.4, 0.4, 0.14, 0.8, 0.26, 0.22, 0.9, 0.2, 0.4, 0.9, 0.25, 0.7, 0.7, 0.25, 0.4, 0.24, 0.1]
 
-for i in range(len(image_files)):
-    img = Image.open(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\training_data\n" + str(i + 1) + ".jpg")
-    img = ImageOps.grayscale(img)
-    img = np.array(img)
-    training(img, weight_set1[0], b1, weight_set2, b2, weight_set3[0], b3, 0.25, classified[i])
+for _ in range(100):
+    for i in range(len(image_files)):
+        img = Image.open(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\training_data\n" + str(i + 1) + ".jpg")
+        img = ImageOps.grayscale(img)
+        img = np.array(img)
+        training(img, weight_set1[0], b1, weight_set2, b2, weight_set3[0], b3, 0.5, classified[i])
+        with open("weights_and_biases.py", "r+") as file:
+            file.seek(0)
+            file.truncate(0)
 
-with open("weights_and_biases.py", "r+") as file:
-    file.seek(0)
-    file.truncate(0)
-logging.info("import numpy as np")
-logging.info(weight_set1)
-logging.info(b1)
-logging.info(weight_set2)
-logging.info(b2)
-logging.info(weight_set3)
-logging.info(b3)
+            logging.info("import numpy as np")
+            logging.info(weight_set1)
+            logging.info(b1)
+            logging.info(weight_set2)
+            logging.info(b2)
+            logging.info(weight_set3)
+            logging.info(b3)
