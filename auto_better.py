@@ -3,24 +3,11 @@ from PIL import Image, ImageOps
 from time import sleep
 import numpy as np
 from pynput.mouse import Button, Controller
-from sklearn import datasets
-from sklearn import svm
 import cv2
 
 #image = cv2.imread(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\training_data\n1.jpg")
 
 mouse = Controller()
-
-def classification(pixels):
-
-    digits = datasets.load_digits()
-
-    clf = svm.SVC(gamma=0.001, C=100)
-
-    x,y = digits.data[:-1], digits.target[:-1]
-    clf.fit(x,y)
-
-    return clf.predict(digits.data[-1])
 
 def auto_bet(x_dimension, y_dimension):
     mouse.position = (x_dimension, y_dimension)
