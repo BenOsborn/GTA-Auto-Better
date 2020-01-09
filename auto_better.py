@@ -2,51 +2,52 @@ import pyautogui as gui
 from PIL import Image, ImageOps
 from time import sleep
 import numpy as np
-from pynput.mouse import Button, Controller
+import pynput.mouse as mouse
+import pynput.keyboard as keyboard
 import cv2
 
 #image = cv2.imread(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\training_data\n1.jpg")
 
-mouse = Controller()
+mousecontroller = mouse.Controller()
 
-def auto_bet(x_dimension, y_dimension):
-    mouse.position = (x_dimension, y_dimension)
-    sleep(0.05)
-    mouse.click(Button.left, 1)
-    sleep(0.05)
-    mouse.position = (1526, 513) #Bet amount position
-    sleep(0.05)
-    mouse.click(Button.left, 27)
-    sleep(0.05)
-    mouse.position = (1321, 787) #Place bet
-    sleep(0.05)
-    mouse.click(Button.left, 1)
-    sleep(40)
-    mouse.position = (950, 985) #Position of bet again
-    sleep(0.05)
-    mouse.click(Button.left, 1)
-    sleep(0.05)
-    mouse.position = (1430, 890) #Position of place bet
-    sleep(0.05)
-    mouse.click(Button.left, 1)
-    sleep(0.05)
+def auto_bet(x, y):
+    mousecontroller.position = (x, y)
+    mousecontroller.press(mouse.Button.left)
+    sleep(0.1)
+    mousecontroller.release(mouse.Button.left)
+    mousecontroller.position = (1526, 513) #Bet amount position
+    for _ in range(28):
+            mousecontroller.press(mouse.Button.left)
+            sleep(0.05)
+            mousecontroller.release(mouse.Button.left)
+            sleep(0.05)
+    mousecontroller.position = (1321, 787) #Place bet
+    mousecontroller.press(mouse.Button.left)
+    sleep(0.1)
+    mousecontroller.release(mouse.Button.left)
+    sleep(35)
+    mousecontroller.position = (950, 985) #Position of bet again
+    sleep(0.1)
+    mousecontroller.press(mouse.Button.left)
+    sleep(0.1)
+    mousecontroller.release(mouse.Button.left)
+    mousecontroller.position = (1430, 890) #Position of place bet
+    sleep(0.1)
+    mousecontroller.press(mouse.Button.left)
+    sleep(0.1)
+    mousecontroller.release(mouse.Button.left)
+    sleep(0.1)
 
-def main():
+def main_auto():
 
     images = []
     for h in range(6):
         img = gui.screenshot(region=(175, 340 + 120*h, 60, 50))
         img = np.array(img)
-        img = cv2.resize(img, (8, 8), interpolation=cv2.INTER_AREA)
-        img = cv2.Canny(img, 100, 200)
-        img = Image.fromarray(img)
+        img = cv2.resize(img, (14, 12), interpolation=cv2.INTER_AREA) #Why is this 8*8 lol?
         img = ImageOps.grayscale(img)
         img = np.array(img)
-        new_img = []
-        for row in img:
-            for pixel in row:
-                new_img.append(pixel / 255)
-        images.append(new_img)
+        images.append(img)
 
     horse = {}
     for h in range(6):
@@ -75,4 +76,26 @@ def main():
         print("6")
         #auto_bet(210, 920)
 
-main()
+def on_press(key):
+
+    key_pressed = str(key)[1:-1]
+
+    if key_pressed == "1":
+        auto_bet(210, 340)
+    elif key_pressed == "2":
+        auto_bet(210, 450)
+    elif key_pressed == "3":
+        auto_bet(210, 570)
+    elif key_pressed == "4":
+        auto_bet(210, 690)
+    elif key_pressed == "5":
+        auto_bet(210, 800)
+    elif key_pressed == "6":
+        auto_bet(210, 920)
+    if key_pressed == "g":
+        exit()
+    else:
+        pass
+
+with keyboard.Listener(on_press=on_press) as listener:
+    listener.join()
