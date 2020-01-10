@@ -35,12 +35,34 @@ def create_training_data():
             bin_string.append(float(char))
         label.append(bin_string)
 
+    choice_set = [-1, 1]
     kernel1 = []
     for _ in range(5):
-        kernel1.append([random.randrange(-1, 2), random.randrange(-1, 2), random.randrange(-1, 2), random.randrange(-1, 2), random.randrange(-1, 2)])
+        kernel1.append([random.choice(choice_set), random.choice(choice_set), random.choice(choice_set), random.choice(choice_set), random.choice(choice_set)])
     kernel2 = []
+    for _ in range(5):
+        kernel2.append([random.choice(choice_set), random.choice(choice_set), random.choice(choice_set), random.choice(choice_set), random.choice(choice_set)])
+    kernel3 = []
     for _ in range(3):
-        kernel2.append([random.randrange(-1, 2), random.randrange(-1, 2), random.randrange(-1, 2)])
+        kernel3.append([random.choice(choice_set), random.choice(choice_set), random.choice(choice_set)])
+    kernel4 = []
+    for _ in range(3):
+        kernel4.append([random.choice(choice_set), random.choice(choice_set), random.choice(choice_set)])
+    kernel5 = []
+    for _ in range(2):
+        kernel5.append([random.choice(choice_set), random.choice(choice_set)])
+    kernel6 = []
+    for _ in range(2):
+        kernel6.append([random.choice(choice_set), random.choice(choice_set)])
+
+    weights1 = []
+    for _ in range(24):
+        weights1.append(np.random.uniform(size=16))
+    bias1 = np.random.uniform(size=1)
+    weights2 = []
+    for _ in range(5):
+        weights2.append(np.random.uniform(size=24))
+    bias2 = np.random.uniform(size=1)
 
     pickle_out = open("data.pickle", "wb")
     pickle.dump(data, pickle_out)
@@ -53,6 +75,30 @@ def create_training_data():
     pickle_out.close()
     pickle_out = open("kernel2.pickle", "wb")
     pickle.dump(kernel2, pickle_out)
+    pickle_out.close()
+    pickle_out = open("kernel3.pickle", "wb")
+    pickle.dump(kernel3, pickle_out)
+    pickle_out.close()
+    pickle_out = open("kernel4.pickle", "wb")
+    pickle.dump(kernel4, pickle_out)
+    pickle_out.close()
+    pickle_out = open("kernel5.pickle", "wb")
+    pickle.dump(kernel5, pickle_out)
+    pickle_out.close()
+    pickle_out = open("kernel6.pickle", "wb")
+    pickle.dump(kernel6, pickle_out)
+    pickle_out.close()
+    pickle_out = open("weights1.pickle", "wb")
+    pickle.dump(weights1, pickle_out)
+    pickle_out.close()
+    pickle_out = open("bias1.pickle", "wb")
+    pickle.dump(bias1, pickle_out)
+    pickle_out.close()
+    pickle_out = open("weights2.pickle", "wb")
+    pickle.dump(weights2, pickle_out)
+    pickle_out.close()
+    pickle_out = open("bias2.pickle", "wb")
+    pickle.dump(bias2, pickle_out)
     pickle_out.close()
 
 def relu(x):
@@ -74,65 +120,183 @@ def pool(square):
     sorted = np.sort(square, kind="quicksort")
     return sorted[-1]
 
-#create_training_data()
-
-data = pickle.load(open("data.pickle", "rb"))
-label = pickle.load(open("label.pickle", "rb"))
-kernel1 = pickle.load(open("kernel1.pickle", "rb"))
-kernel2 = pickle.load(open("kernel2.pickle", "rb"))
-
-def classify(image_pixels, kernel1, kernel2):
+def classify(image_pixels, kernel1, kernel2, kernel3, kernel4, kernel5, kernel6, weights1, bias1, weights2, bias2):
 
     #Convolution layer 1
     reshaped_array1 = []
-    weighted_pixel_net_array1 = []
-    weighted_pixel_relu_array1 = [] #Main output layer
+    weighted_pixel_net1_convolution1 = []
+    weighted_pixel_relu1_convolution1 = [] #Main output layer
+    weighted_pixel_net2_convolution1 = []
+    weighted_pixel_relu2_convolution1 = []
     for y in range(7):
         square_row = []
         weighted_pixel_net_row1 = []
         weighted_pixel_relu_row1 = []
+        weighted_pixel_net_row2 = []
+        weighted_pixel_relu_row2 = []
         for x in range(10):
             square = [image_pixels[y][x:x+5], image_pixels[y+1][x:x+5], image_pixels[y+2][x:x+5], image_pixels[y+3][x:x+5], image_pixels[y+4][x:x+5]]
+
             weighted_pixel_net1 = (np.dot(square[0], kernel1[0]) + np.dot(square[1], kernel1[1]) + np.dot(square[2], kernel1[2]) + np.dot(square[3], kernel1[3]) + np.dot(square[4], kernel1[4]))/25
             weighted_pixel_relu1 = relu(weighted_pixel_net1)
+            weighted_pixel_net2 = (np.dot(square[0], kernel2[0]) + np.dot(square[1], kernel2[1]) + np.dot(square[2], kernel2[2]) + np.dot(square[3], kernel2[3]) + np.dot(square[4], kernel2[4]))/25
+            weighted_pixel_relu2 = relu(weighted_pixel_net2)
+
             square_row.append(square)
             weighted_pixel_net_row1.append(weighted_pixel_net1)
             weighted_pixel_relu_row1.append(weighted_pixel_relu1)
-        reshaped_array1.append(square_row)
-        weighted_pixel_net_array1.append(weighted_pixel_net_row1)
-        weighted_pixel_relu_array1.append(weighted_pixel_relu_row1)
-
-    #Pooling layer
-    weighted_pixel_relu_array1.append([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) #Adding padding layer
-    pooled_array = []
-    for y in range(4):
-        pooled_row = []
-        for x in range(5):
-            square = [weighted_pixel_relu_array1[y*2][2*x], weighted_pixel_relu_array1[y*2][2*x+1], weighted_pixel_relu_array1[y*2+1][2*x], weighted_pixel_relu_array1[y*2+1][2*x+1]]
-            pooled_row.append(pool(square)) #Somehow going to have to connect the corrected weight to its original matrice that created it while disregarding the others
-        pooled_array.append(pooled_row)
-
-    #Convolutional layer 2
-    reshaped_array2 = []
-    weighted_pixel_net_array2 = []
-    weighted_pixel_relu_array2 = []
-    flattened_layer = []
-    for y in range(2):
-        square_row = []
-        weighted_pixel_net_row2 = []
-        weighted_pixel_relu_row2 = []
-        for x in range(3):
-            square = [pooled_array[y][x:x+3], pooled_array[y+1][x:x+3], pooled_array[y+2][x:x+3]]
-            weighted_pixel_net2 = (np.dot(square[0], kernel2[0]) + np.dot(square[1], kernel2[1]) + np.dot(square[2], kernel2[2]))/9
-            weighted_pixel_relu2 = relu(weighted_pixel_net2)
-            square_row.append(square)
             weighted_pixel_net_row2.append(weighted_pixel_net2)
             weighted_pixel_relu_row2.append(weighted_pixel_relu2)
-            flattened_layer.append(weighted_pixel_relu2)
-        reshaped_array2.append(square_row)
-        weighted_pixel_net_array2.append(weighted_pixel_net_row2)
-        weighted_pixel_relu_array2.append(weighted_pixel_relu_row2)
 
-    print(flattened_layer)
+        reshaped_array1.append(square_row)
+        weighted_pixel_net1_convolution1.append(weighted_pixel_net_row1)
+        weighted_pixel_relu1_convolution1.append(weighted_pixel_relu_row1)
+        weighted_pixel_net2_convolution1.append(weighted_pixel_net_row2)
+        weighted_pixel_relu2_convolution1.append(weighted_pixel_relu_row2)
 
-classify(data[0], kernel1, kernel2)
+    #Pooling layer
+    weighted_pixel_relu1_convolution1.append([0, 0, 0, 0, 0, 0, 0, 0, 0, 0]) #Added padding
+    weighted_pixel_relu2_convolution1.append([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+    pooled_array1 = []
+    pooled_array2 = []
+    for y in range(4):
+        pooled_row1 = []
+        pooled_row2 = []
+        for x in range(5):
+            square1 = [weighted_pixel_relu1_convolution1[y*2][2*x], weighted_pixel_relu1_convolution1[y*2][2*x+1], weighted_pixel_relu1_convolution1[y*2+1][2*x], weighted_pixel_relu1_convolution1[y*2+1][2*x+1]]
+            pooled_row1.append(pool(square1)) #Somehow going to have to connect the corrected weight to its original matrice that created it while disregarding the others
+            square2 = [weighted_pixel_relu2_convolution1[y*2][2*x], weighted_pixel_relu2_convolution1[y*2][2*x+1], weighted_pixel_relu2_convolution1[y*2+1][2*x], weighted_pixel_relu2_convolution1[y*2+1][2*x+1]]
+            pooled_row2.append(pool(square2))
+        pooled_array1.append(pooled_row1)
+        pooled_array2.append(pooled_row2)
+
+    #Convolutional layer 2
+    reshaped_pool_array1 = []
+    reshaped_pool_array2 = []
+    weighted_pixel_net1_convolution2 = []
+    weighted_pixel_relu1_convolution2 = []
+    weighted_pixel_net2_convolution2 = []
+    weighted_pixel_relu2_convolution2 = []
+    weighted_pixel_net3_convolution2 = []
+    weighted_pixel_relu3_convolution2 = []
+    weighted_pixel_net4_convolution2 = []
+    weighted_pixel_relu4_convolution2 = []
+    for y in range(2):
+        square_row1 = []
+        square_row2 = []
+        weighted_pixel_net_row1 = []
+        weighted_pixel_relu_row1 = []
+        weighted_pixel_net_row2 = []
+        weighted_pixel_relu_row2 = []
+        weighted_pixel_net_row3 = []
+        weighted_pixel_relu_row3 = []
+        weighted_pixel_net_row4 = []
+        weighted_pixel_relu_row4 = []
+        for x in range(3):
+            square1 = [pooled_array1[y][x:x+3], pooled_array1[y+1][x:x+3], pooled_array1[y+2][x:x+3]]
+            square2 = [pooled_array2[y][x:x+3], pooled_array2[y+1][x:x+3], pooled_array2[y+2][x:x+3]]
+            weighted_pixel_net1 = (np.dot(square1[0], kernel3[0]) + np.dot(square1[1], kernel3[1]) + np.dot(square1[2], kernel3[2]))/9
+            weighted_pixel_net2 = (np.dot(square1[0], kernel4[0]) + np.dot(square1[1], kernel4[1]) + np.dot(square1[2], kernel4[2]))/9
+            weighted_pixel_net3 = (np.dot(square2[0], kernel3[0]) + np.dot(square2[1], kernel3[1]) + np.dot(square2[2], kernel3[2]))/9
+            weighted_pixel_net4 = (np.dot(square2[0], kernel4[0]) + np.dot(square2[1], kernel4[1]) + np.dot(square2[2], kernel4[2]))/9
+            weighted_pixel_relu1 = relu(weighted_pixel_net1)
+            weighted_pixel_relu2 = relu(weighted_pixel_net2)
+            weighted_pixel_relu3 = relu(weighted_pixel_net3)
+            weighted_pixel_relu4 = relu(weighted_pixel_net4)
+
+            square_row1.append(square1)
+            square_row2.append(square2)
+            weighted_pixel_net_row1.append(weighted_pixel_net1)
+            weighted_pixel_relu_row1.append(weighted_pixel_relu1)
+            weighted_pixel_net_row2.append(weighted_pixel_net2)
+            weighted_pixel_relu_row2.append(weighted_pixel_relu2)
+            weighted_pixel_net_row3.append(weighted_pixel_net3)
+            weighted_pixel_relu_row3.append(weighted_pixel_relu3)
+            weighted_pixel_net_row4.append(weighted_pixel_net4)
+            weighted_pixel_relu_row4.append(weighted_pixel_relu4)
+
+        reshaped_pool_array1.append(square_row1)
+        reshaped_pool_array2.append(square_row2)
+        weighted_pixel_net1_convolution2.append(weighted_pixel_net_row1)
+        weighted_pixel_relu1_convolution2.append(weighted_pixel_relu_row1)
+        weighted_pixel_net2_convolution2.append(weighted_pixel_net_row2)
+        weighted_pixel_relu2_convolution2.append(weighted_pixel_relu_row2)
+        weighted_pixel_net3_convolution2.append(weighted_pixel_net_row3)
+        weighted_pixel_relu3_convolution2.append(weighted_pixel_relu_row3)
+        weighted_pixel_net4_convolution2.append(weighted_pixel_net_row4)
+        weighted_pixel_relu4_convolution2.append(weighted_pixel_relu_row4)
+
+    #Convolutional layer 3 (Max output layer flatten) (Output of last = weighted_pixel_reluN_convolution2)
+    flattened_net = []
+    flattened_relu = []
+    for x in range(2):
+        square1 = [weighted_pixel_relu1_convolution2[0][x:x+2], weighted_pixel_relu1_convolution2[1][x:x+2]]
+        square2 = [weighted_pixel_relu2_convolution2[0][x:x+2], weighted_pixel_relu2_convolution2[1][x:x+2]]
+        square3 = [weighted_pixel_relu3_convolution2[0][x:x+2], weighted_pixel_relu3_convolution2[1][x:x+2]]
+        square4 = [weighted_pixel_relu4_convolution2[0][x:x+2], weighted_pixel_relu4_convolution2[1][x:x+2]]
+
+        weighted_pixel_net1 = (np.dot(square1[0], kernel5[0]) + np.dot(square1[1], kernel5[1]))/4
+        weighted_pixel_net2 = (np.dot(square1[0], kernel6[0]) + np.dot(square1[1], kernel6[1]))/4
+        weighted_pixel_net3 = (np.dot(square2[0], kernel5[0]) + np.dot(square2[1], kernel5[1]))/4
+        weighted_pixel_net4 = (np.dot(square2[0], kernel6[0]) + np.dot(square2[1], kernel6[1]))/4
+        weighted_pixel_net5 = (np.dot(square3[0], kernel5[0]) + np.dot(square3[1], kernel5[1]))/4
+        weighted_pixel_net6 = (np.dot(square3[0], kernel6[0]) + np.dot(square3[1], kernel6[1]))/4
+        weighted_pixel_net7 = (np.dot(square4[0], kernel5[0]) + np.dot(square4[1], kernel5[1]))/4
+        weighted_pixel_net8 = (np.dot(square4[0], kernel6[0]) + np.dot(square4[1], kernel6[1]))/4
+        flattened_net.append(weighted_pixel_net1)
+        flattened_net.append(weighted_pixel_net2)
+        flattened_net.append(weighted_pixel_net3)
+        flattened_net.append(weighted_pixel_net4)
+        flattened_net.append(weighted_pixel_net5)
+        flattened_net.append(weighted_pixel_net6)
+        flattened_net.append(weighted_pixel_net7)
+        flattened_net.append(weighted_pixel_net8)
+
+        weighted_pixel_relu1 = relu(weighted_pixel_net1)
+        weighted_pixel_relu2 = relu(weighted_pixel_net2)
+        weighted_pixel_relu3 = relu(weighted_pixel_net3)
+        weighted_pixel_relu4 = relu(weighted_pixel_net4)
+        weighted_pixel_relu5 = relu(weighted_pixel_net5)
+        weighted_pixel_relu6 = relu(weighted_pixel_net6)
+        weighted_pixel_relu7 = relu(weighted_pixel_net7)
+        weighted_pixel_relu8 = relu(weighted_pixel_net8)
+        flattened_relu.append(weighted_pixel_relu1)
+        flattened_relu.append(weighted_pixel_relu2)
+        flattened_relu.append(weighted_pixel_relu3)
+        flattened_relu.append(weighted_pixel_relu4)
+        flattened_relu.append(weighted_pixel_relu5)
+        flattened_relu.append(weighted_pixel_relu6)
+        flattened_relu.append(weighted_pixel_relu7)
+        flattened_relu.append(weighted_pixel_relu8)
+
+    hidden_layer_net = []
+    hidden_layer_relu = []
+    for i in range(24):
+        z = np.dot(flattened_relu, weights1[i]) + bias1[0]
+        hidden_layer_net.append(z)
+        hidden_layer_relu.append(relu(z))
+
+    output_layer_net = []
+    output_layer_sigmoid = []
+    for i in range(5):
+        z = np.dot(hidden_layer_relu, weights2[i]) + bias2[0]
+        output_layer_net.append(z)
+        output_layer_sigmoid.append(sigmoid(z))
+
+    print(output_layer_sigmoid)
+
+#create_training_data()
+data = pickle.load(open("data.pickle", "rb"))
+label = pickle.load(open("label.pickle", "rb"))
+kernel1 = pickle.load(open("kernel1.pickle", "rb"))
+kernel2 = pickle.load(open("kernel2.pickle", "rb"))
+kernel3 = pickle.load(open("kernel3.pickle", "rb"))
+kernel4 = pickle.load(open("kernel4.pickle", "rb"))
+kernel5 = pickle.load(open("kernel5.pickle", "rb"))
+kernel6 = pickle.load(open("kernel6.pickle", "rb"))
+weights1 = pickle.load(open("weights1.pickle", "rb"))
+bias1 = pickle.load(open("bias1.pickle", "rb"))
+weights2 = pickle.load(open("weights2.pickle", "rb"))
+bias2 = pickle.load(open("bias2.pickle", "rb"))
+
+classify(data[3], kernel1, kernel2, kernel3, kernel4, kernel5, kernel6, weights1, bias1, weights2, bias2)
