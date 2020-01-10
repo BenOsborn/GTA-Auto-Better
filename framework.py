@@ -20,6 +20,7 @@ def create_training_data():
             try:
                 img_array = cv2.imread(os.path.join(path, img), cv2.IMREAD_GRAYSCALE)
                 img_array = cv2.resize(img_array, (14, 12), interpolation=cv2.INTER_AREA)
+                img_array = cv2.Canny(img_array, 100, 200)
                 training_data.append([img_array, class_num])
             except:
                 pass
@@ -38,10 +39,10 @@ def create_training_data():
     choice_set = [-1, 1]
     kernel1 = []
     for _ in range(5):
-        kernel1.append([random.choice(choice_set), random.choice(choice_set), random.choice(choice_set), random.choice(choice_set), random.choice(choice_set)])
+        kernel1.append([random.choice(choice_set)/255, random.choice(choice_set)/255, random.choice(choice_set)/255, random.choice(choice_set)/255, random.choice(choice_set)/255])
     kernel2 = []
     for _ in range(5):
-        kernel2.append([random.choice(choice_set), random.choice(choice_set), random.choice(choice_set), random.choice(choice_set), random.choice(choice_set)])
+        kernel2.append([random.choice(choice_set)/255, random.choice(choice_set)/255, random.choice(choice_set)/255, random.choice(choice_set)/255, random.choice(choice_set)/255])
     kernel3 = []
     for _ in range(3):
         kernel3.append([random.choice(choice_set), random.choice(choice_set), random.choice(choice_set)])
@@ -252,22 +253,22 @@ def classify(image_pixels, kernel1, kernel2, kernel3, kernel4, kernel5, kernel6,
         flattened_net.append(weighted_pixel_net7)
         flattened_net.append(weighted_pixel_net8)
 
-        weighted_pixel_sigmoid1 = sigmoid(weighted_pixel_net1)
-        weighted_pixel_sigmoid2 = sigmoid(weighted_pixel_net2)
-        weighted_pixel_sigmoid3 = sigmoid(weighted_pixel_net3)
-        weighted_pixel_sigmoid4 = sigmoid(weighted_pixel_net4)
-        weighted_pixel_sigmoid5 = sigmoid(weighted_pixel_net5)
-        weighted_pixel_sigmoid6 = sigmoid(weighted_pixel_net6)
-        weighted_pixel_sigmoid7 = sigmoid(weighted_pixel_net7)
-        weighted_pixel_sigmoid8 = sigmoid(weighted_pixel_net8)
-        flattened_relu.append(weighted_pixel_sigmoid1)
-        flattened_relu.append(weighted_pixel_sigmoid2)
-        flattened_relu.append(weighted_pixel_sigmoid3)
-        flattened_relu.append(weighted_pixel_sigmoid4)
-        flattened_relu.append(weighted_pixel_sigmoid5)
-        flattened_relu.append(weighted_pixel_sigmoid6)
-        flattened_relu.append(weighted_pixel_sigmoid7)
-        flattened_relu.append(weighted_pixel_sigmoid8)
+        weighted_pixel_relu1 = sigmoid(weighted_pixel_net1)
+        weighted_pixel_relu2 = sigmoid(weighted_pixel_net2)
+        weighted_pixel_relu3 = sigmoid(weighted_pixel_net3)
+        weighted_pixel_relu4 = sigmoid(weighted_pixel_net4)
+        weighted_pixel_relu5 = sigmoid(weighted_pixel_net5)
+        weighted_pixel_relu6 = sigmoid(weighted_pixel_net6)
+        weighted_pixel_relu7 = sigmoid(weighted_pixel_net7)
+        weighted_pixel_relu8 = sigmoid(weighted_pixel_net8)
+        flattened_relu.append(weighted_pixel_relu1)
+        flattened_relu.append(weighted_pixel_relu2)
+        flattened_relu.append(weighted_pixel_relu3)
+        flattened_relu.append(weighted_pixel_relu4)
+        flattened_relu.append(weighted_pixel_relu5)
+        flattened_relu.append(weighted_pixel_relu6)
+        flattened_relu.append(weighted_pixel_relu7)
+        flattened_relu.append(weighted_pixel_relu8)
 
     hidden_layer_net = []
     hidden_layer_sigmoid = []
@@ -314,19 +315,6 @@ def train(image_pixels, label, learning_rate, kernel1, kernel2, kernel3, kernel4
             weights1[a][b] = weights1old[a][b] - -learning_rate*hidden_layer_error[a]*sigmoidd(out[1][a])*out[0][b]
     bias1[0] = bias1old[0] - -learning_rate*hidden_layer_error[0]*sigmoid(out[1][0])
 
-    pickle_out = open("weights2.pickle", "wb")
-    pickle.dump(weights2, pickle_out)
-    pickle_out.close()
-    pickle_out = open("bias2.pickle", "wb")
-    pickle.dump(bias2, pickle_out)
-    pickle_out.close()
-    pickle_out = open("weights1.pickle", "wb")
-    pickle.dump(weights1, pickle_out)
-    pickle_out.close()
-    pickle_out = open("bias1.pickle", "wb")
-    pickle.dump(bias1, pickle_out)
-    pickle_out.close()
-
 #create_training_data()
 data = pickle.load(open("data.pickle", "rb"))
 label = pickle.load(open("label.pickle", "rb"))
@@ -341,5 +329,23 @@ bias1 = pickle.load(open("bias1.pickle", "rb"))
 weights2 = pickle.load(open("weights2.pickle", "rb"))
 bias2 = pickle.load(open("bias2.pickle", "rb"))
 
+print(data[1])
+print(classify(data[1], kernel1, kernel2, kernel3, kernel4, kernel5, kernel6, weights1, bias1, weights2, bias2)[0])
+print(classify(data[1], kernel1, kernel2, kernel3, kernel4, kernel5, kernel6, weights1, bias1, weights2, bias2)[4])
+print(label[1])
+
 for i in range(len(data)):
     train(data[i], label[i], 0.5, kernel1, kernel2, kernel3, kernel4, kernel5, kernel6, weights1, bias1, weights2, bias2)
+
+pickle_out = open("weights2.pickle", "wb")
+pickle.dump(weights2, pickle_out)
+pickle_out.close()
+pickle_out = open("bias2.pickle", "wb")
+pickle.dump(bias2, pickle_out)
+pickle_out.close()
+pickle_out = open("weights1.pickle", "wb")
+pickle.dump(weights1, pickle_out)
+pickle_out.close()
+pickle_out = open("bias1.pickle", "wb")
+pickle.dump(bias1, pickle_out)
+pickle_out.close()
