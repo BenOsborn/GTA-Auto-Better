@@ -25,7 +25,7 @@ def auto_bet(x, y):
     mousecontroller.press(mouse.Button.left)
     sleep(0.1)
     mousecontroller.release(mouse.Button.left)
-    sleep(35)
+    sleep(39)
     mousecontroller.position = (950, 985) #Position of bet again
     sleep(0.1)
     mousecontroller.press(mouse.Button.left)

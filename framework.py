@@ -252,38 +252,80 @@ def classify(image_pixels, kernel1, kernel2, kernel3, kernel4, kernel5, kernel6,
         flattened_net.append(weighted_pixel_net7)
         flattened_net.append(weighted_pixel_net8)
 
-        weighted_pixel_relu1 = relu(weighted_pixel_net1)
-        weighted_pixel_relu2 = relu(weighted_pixel_net2)
-        weighted_pixel_relu3 = relu(weighted_pixel_net3)
-        weighted_pixel_relu4 = relu(weighted_pixel_net4)
-        weighted_pixel_relu5 = relu(weighted_pixel_net5)
-        weighted_pixel_relu6 = relu(weighted_pixel_net6)
-        weighted_pixel_relu7 = relu(weighted_pixel_net7)
-        weighted_pixel_relu8 = relu(weighted_pixel_net8)
-        flattened_relu.append(weighted_pixel_relu1)
-        flattened_relu.append(weighted_pixel_relu2)
-        flattened_relu.append(weighted_pixel_relu3)
-        flattened_relu.append(weighted_pixel_relu4)
-        flattened_relu.append(weighted_pixel_relu5)
-        flattened_relu.append(weighted_pixel_relu6)
-        flattened_relu.append(weighted_pixel_relu7)
-        flattened_relu.append(weighted_pixel_relu8)
+        weighted_pixel_sigmoid1 = sigmoid(weighted_pixel_net1)
+        weighted_pixel_sigmoid2 = sigmoid(weighted_pixel_net2)
+        weighted_pixel_sigmoid3 = sigmoid(weighted_pixel_net3)
+        weighted_pixel_sigmoid4 = sigmoid(weighted_pixel_net4)
+        weighted_pixel_sigmoid5 = sigmoid(weighted_pixel_net5)
+        weighted_pixel_sigmoid6 = sigmoid(weighted_pixel_net6)
+        weighted_pixel_sigmoid7 = sigmoid(weighted_pixel_net7)
+        weighted_pixel_sigmoid8 = sigmoid(weighted_pixel_net8)
+        flattened_relu.append(weighted_pixel_sigmoid1)
+        flattened_relu.append(weighted_pixel_sigmoid2)
+        flattened_relu.append(weighted_pixel_sigmoid3)
+        flattened_relu.append(weighted_pixel_sigmoid4)
+        flattened_relu.append(weighted_pixel_sigmoid5)
+        flattened_relu.append(weighted_pixel_sigmoid6)
+        flattened_relu.append(weighted_pixel_sigmoid7)
+        flattened_relu.append(weighted_pixel_sigmoid8)
 
     hidden_layer_net = []
-    hidden_layer_relu = []
+    hidden_layer_sigmoid = []
     for i in range(24):
         z = np.dot(flattened_relu, weights1[i]) + bias1[0]
         hidden_layer_net.append(z)
-        hidden_layer_relu.append(relu(z))
+        hidden_layer_sigmoid.append(sigmoid(z))
 
     output_layer_net = []
     output_layer_sigmoid = []
     for i in range(5):
-        z = np.dot(hidden_layer_relu, weights2[i]) + bias2[0]
+        z = np.dot(hidden_layer_sigmoid, weights2[i]) + bias2[0]
         output_layer_net.append(z)
         output_layer_sigmoid.append(sigmoid(z))
 
-    print(output_layer_sigmoid)
+    return [flattened_relu, hidden_layer_net, hidden_layer_sigmoid, output_layer_net, output_layer_sigmoid]
+
+def train(image_pixels, label, learning_rate, kernel1, kernel2, kernel3, kernel4, kernel5, kernel6, weights1, bias1, weights2, bias2):
+
+    out = classify(image_pixels, kernel1, kernel2, kernel3, kernel4, kernel5, kernel6, weights1, bias1, weights2, bias2)
+
+    weights1old = weights1
+    bias1old = bias1
+    weights2old = weights2
+    bias2old = bias2
+
+    #Adjusting second layer of weights
+    for a in range(5):
+        for b in range(24):
+            weights2[a][b] = weights2old[a][b] - -learning_rate*(label[a] - out[4][a])*sigmoidd(out[3][a])*out[2][b]
+    bias2[0] = bias2old[0] - -learning_rate*(label[0] - out[4][0])*sigmoidd(out[3][0])
+
+    #Find error for hidden layer
+    hidden_layer_error = []
+    for b in range(24):
+        error = 0
+        for a in range(5):
+            error += -(label[a] - out[4][a])*sigmoidd(out[3][a])*weights2old[a][b]
+        hidden_layer_error.append(error)
+
+    #Adjusting first layer of weights
+    for a in range(24):
+        for b in range(16):
+            weights1[a][b] = weights1old[a][b] - -learning_rate*hidden_layer_error[a]*sigmoidd(out[1][a])*out[0][b]
+    bias1[0] = bias1old[0] - -learning_rate*hidden_layer_error[0]*sigmoid(out[1][0])
+
+    pickle_out = open("weights2.pickle", "wb")
+    pickle.dump(weights2, pickle_out)
+    pickle_out.close()
+    pickle_out = open("bias2.pickle", "wb")
+    pickle.dump(bias2, pickle_out)
+    pickle_out.close()
+    pickle_out = open("weights1.pickle", "wb")
+    pickle.dump(weights1, pickle_out)
+    pickle_out.close()
+    pickle_out = open("bias1.pickle", "wb")
+    pickle.dump(bias1, pickle_out)
+    pickle_out.close()
 
 #create_training_data()
 data = pickle.load(open("data.pickle", "rb"))
@@ -299,4 +341,5 @@ bias1 = pickle.load(open("bias1.pickle", "rb"))
 weights2 = pickle.load(open("weights2.pickle", "rb"))
 bias2 = pickle.load(open("bias2.pickle", "rb"))
 
-classify(data[3], kernel1, kernel2, kernel3, kernel4, kernel5, kernel6, weights1, bias1, weights2, bias2)
+for i in range(len(data)):
+    train(data[i], label[i], 0.5, kernel1, kernel2, kernel3, kernel4, kernel5, kernel6, weights1, bias1, weights2, bias2)
