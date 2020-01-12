@@ -1,101 +1,107 @@
 import pyautogui as gui
-from PIL import Image, ImageOps
+from PIL import ImageOps
 from time import sleep
 import numpy as np
 import pynput.mouse as mouse
-import pynput.keyboard as keyboard
 import cv2
+import pickle
+import tensorflow as tf
+from tensorflow import keras
 
-#image = cv2.imread(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\training_data\n1.jpg")
+data = pickle.load(open(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\pickles\data.p", "rb"))
+label = pickle.load(open(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\pickles\label.p", "rb"))
 
-mousecontroller = mouse.Controller()
+model = keras.Sequential([
+    keras.layers.Flatten(input_shape=(48, 56)),
+    keras.layers.Dense(128, activation=tf.nn.relu),
+    keras.layers.Dense(30, activation=tf.nn.softmax)
+])
+
+model.compile(optimizer="adam",
+              loss="sparse_categorical_crossentropy",
+              metrics=["accuracy"])
+
+model.fit(data, label, epochs=10)
+
+def highlight(image_array):
+    for y in range(len(image_array)):
+        for x in range(len(image_array[0])):
+            if image_array[y][x] < 40:
+                image_array[y][x] = 0
+            else:
+                image_array[y][x] = 1 #255
+    return image_array
 
 def auto_bet(x, y):
-    mousecontroller.position = (x, y)
-    mousecontroller.press(mouse.Button.left)
+    mouse.Controller().position = (x, y)
+    mouse.Controller().press(mouse.Button.left)
     sleep(0.1)
-    mousecontroller.release(mouse.Button.left)
-    mousecontroller.position = (1526, 513) #Bet amount position
+    mouse.Controller().release(mouse.Button.left)
+    mouse.Controller().position = (1526, 513)
     for _ in range(28):
-            mousecontroller.press(mouse.Button.left)
+            mouse.Controller().press(mouse.Button.left)
             sleep(0.05)
-            mousecontroller.release(mouse.Button.left)
+            mouse.Controller().release(mouse.Button.left)
             sleep(0.05)
-    mousecontroller.position = (1321, 787) #Place bet
-    mousecontroller.press(mouse.Button.left)
+    mouse.Controller().position = (1321, 787)
+    mouse.Controller().press(mouse.Button.left)
     sleep(0.1)
-    mousecontroller.release(mouse.Button.left)
+    mouse.Controller().release(mouse.Button.left)
     sleep(39)
-    mousecontroller.position = (950, 985) #Position of bet again
+    mouse.Controller().position = (950, 985)
     sleep(0.1)
-    mousecontroller.press(mouse.Button.left)
+    mouse.Controller().press(mouse.Button.left)
     sleep(0.1)
-    mousecontroller.release(mouse.Button.left)
-    mousecontroller.position = (1430, 890) #Position of place bet
+    mouse.Controller().release(mouse.Button.left)
+    mouse.Controller().position = (1430, 890)
     sleep(0.1)
-    mousecontroller.press(mouse.Button.left)
+    mouse.Controller().press(mouse.Button.left)
     sleep(0.1)
-    mousecontroller.release(mouse.Button.left)
+    mouse.Controller().release(mouse.Button.left)
     sleep(0.1)
 
 def main_auto():
 
     images = []
     for h in range(6):
-        img = gui.screenshot(region=(175, 340 + 120*h, 60, 50))
-        img = np.array(img)
-        img = cv2.resize(img, (14, 12), interpolation=cv2.INTER_AREA) #Why is this 8*8 lol?
+        img = gui.screenshot(region=(180, 340 + 121*h, 56, 48))
         img = ImageOps.grayscale(img)
-        img = np.array(img)
-        images.append(img)
+        img = highlight(np.array(img))
+        images.append(np.array(img))
+    images = np.array(images)
 
-    horse = {}
-    for h in range(6):
-        horse[h + 1] = classification(images[h])
+    predictions = model.predict(images)
 
-    horse_sorted = sorted(horse.items(), key = lambda t:t[1])
+    min_values = []
+    for prediction in predictions:
+        indexed_predictions = {}
+        for i in range(len(prediction)):
+            indexed_predictions[i + 1] = prediction[i]
+        prediction_sorted = sorted(indexed_predictions.items(), key = lambda t:t[1])
+        min_values.append(list(prediction_sorted)[-1][0])
 
-    value = list(horse_sorted)[0][0]
+    min_values_sorted = {}
+    for i in range(6):
+        min_values_sorted[i + 1] = min_values[i]
+    values_sorted = sorted(min_values_sorted.items(), key = lambda t:t[1])
+    value = list(values_sorted)[0][0]
 
     if value == 1:
-        print("1")
-        #auto_bet(210, 340)
-    elif value == 2:
-        print("2")
-        #auto_bet(210, 450)
-    elif value == 3:
-        print("3")
-        #auto_bet(210, 570)
-    elif value == 4:
-        print("4")
-        #auto_bet(210, 690)
-    elif value == 5:
-        print("5")
-        #auto_bet(210, 800)
-    elif value == 6:
-        print("6")
-        #auto_bet(210, 920)
-
-def on_press(key):
-
-    key_pressed = str(key)[1:-1]
-
-    if key_pressed == "1":
         auto_bet(210, 340)
-    elif key_pressed == "2":
+    elif value == 2:
         auto_bet(210, 450)
-    elif key_pressed == "3":
+    elif value == 3:
         auto_bet(210, 570)
-    elif key_pressed == "4":
+    elif value == 4:
         auto_bet(210, 690)
-    elif key_pressed == "5":
+    elif value == 5:
         auto_bet(210, 800)
-    elif key_pressed == "6":
+    elif value == 6:
         auto_bet(210, 920)
-    if key_pressed == "g":
-        exit()
     else:
         pass
 
-with keyboard.Listener(on_press=on_press) as listener:
-    listener.join()
+
+sleep(3)
+while True:
+    main_auto()
