@@ -2,7 +2,7 @@
 
 Created by Ben Osborn
 
-A program which can automatically bet on horses featured in the GTA casino horse betting minigame. Created for educational purposes only.
+A program which can automatically bet on horses featured in the GTA casino horse betting minigame. It selects the horse with the best chance of winning and max bets on it, and will repeat this cycle indefinitely. Created for educational purposes only.
 
 Usage:
 - Load GTA at 1080p resolution on your main monitor
