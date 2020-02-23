@@ -28,7 +28,7 @@ def screenshot(key):
         for a in range(6):
 
             img = gui.screenshot(region=(180, 340 + 121*a, 56, 48))
-            img.save(os.path.join(TRAINDIR, ("n" + str(i[0]) + ".jpg"))
+            img.save(os.path.join(TRAINDIR, ("n" + str(i[0]) + ".jpg")))
             i[0] += 1
 
     else:
