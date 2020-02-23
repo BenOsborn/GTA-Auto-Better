@@ -8,8 +8,11 @@ import pickle
 import tensorflow as tf
 from tensorflow import keras
 
-data = pickle.load(open(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\pickles\data.p", "rb"))
-label = pickle.load(open(r"C:\Users\bengr\Documents\Programs\GTA-Auto-Better\pickles\label.p", "rb"))
+CWD = os.getcwd()
+PICKLEPATH = os.path.join(CWD, "pickles")
+
+data = pickle.load(open(os.path.join(PICKLEPATH, "data.p"), "rb"))
+label = pickle.load(open(os.path.join(PICKLEPATH, "label.p"), "rb"))
 
 model = keras.Sequential([
     keras.layers.Flatten(input_shape=(48, 56)),
