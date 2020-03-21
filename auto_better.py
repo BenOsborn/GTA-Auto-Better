@@ -103,8 +103,7 @@ def main_auto():
         auto_bet(210, 920)
     else:
         pass
-
-
+    
 sleep(3)
 while True:
     main_auto()
