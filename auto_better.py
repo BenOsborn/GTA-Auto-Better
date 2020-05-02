@@ -4,27 +4,10 @@ from time import sleep
 import numpy as np
 import pynput.mouse as mouse
 import cv2
-import pickle
 import tensorflow as tf
-from tensorflow import keras
-
-CWD = os.getcwd()
-PICKLEPATH = os.path.join(CWD, "pickles")
-
-data = pickle.load(open(os.path.join(PICKLEPATH, "data.p"), "rb"))
-label = pickle.load(open(os.path.join(PICKLEPATH, "label.p"), "rb"))
-
-model = keras.Sequential([
-    keras.layers.Flatten(input_shape=(48, 56)),
-    keras.layers.Dense(128, activation=tf.nn.relu),
-    keras.layers.Dense(30, activation=tf.nn.softmax)
-])
-
-model.compile(optimizer="adam",
-              loss="sparse_categorical_crossentropy",
-              metrics=["accuracy"])
-
-model.fit(data, label, epochs=10)
+from keras.models import load_model
+from keras.utils import get_custom_objects
+import os
 
 def highlight(image_array):
     for y in range(len(image_array)):
@@ -36,34 +19,35 @@ def highlight(image_array):
     return image_array
 
 def auto_bet(x, y):
-    mouse.Controller().position = (x, y)
-    mouse.Controller().press(mouse.Button.left)
+    mCTRL = mouse.Controller()
+    mCTRL.position = (x, y)
+    mCTRL.press(mouse.Button.left)
     sleep(0.1)
-    mouse.Controller().release(mouse.Button.left)
-    mouse.Controller().position = (1526, 513)
+    mCTRL.release(mouse.Button.left)
+    mCTRL.position = (1526, 513)
     for _ in range(28):
-            mouse.Controller().press(mouse.Button.left)
+            mCTRL.press(mouse.Button.left)
             sleep(0.05)
-            mouse.Controller().release(mouse.Button.left)
+            mCTRL.release(mouse.Button.left)
             sleep(0.05)
-    mouse.Controller().position = (1321, 787)
-    mouse.Controller().press(mouse.Button.left)
+    mCTRL.position = (1321, 787)
+    mCTRL.press(mouse.Button.left)
     sleep(0.1)
-    mouse.Controller().release(mouse.Button.left)
+    mCTRL.release(mouse.Button.left)
     sleep(39)
-    mouse.Controller().position = (950, 985)
+    mCTRL.position = (950, 985)
     sleep(0.1)
-    mouse.Controller().press(mouse.Button.left)
+    mCTRL.press(mouse.Button.left)
     sleep(0.1)
-    mouse.Controller().release(mouse.Button.left)
-    mouse.Controller().position = (1430, 890)
+    mCTRL.release(mouse.Button.left)
+    mCTRL.position = (1430, 890)
     sleep(0.1)
-    mouse.Controller().press(mouse.Button.left)
+    mCTRL.press(mouse.Button.left)
     sleep(0.1)
-    mouse.Controller().release(mouse.Button.left)
+    mCTRL.release(mouse.Button.left)
     sleep(0.1)
 
-def main_auto():
+def main_auto(model):
 
     images = []
     for h in range(6):
@@ -101,9 +85,18 @@ def main_auto():
         auto_bet(210, 800)
     elif value == 6:
         auto_bet(210, 920)
-    else:
-        pass
-    
-sleep(3)
-while True:
-    main_auto()
+
+if __name__ == "__main__":
+    print("Welcome to Ben Osborn's auto bet bot!")
+ 
+    CWD = os.getcwd()
+    MODELPATH = os.path.join(CWD, "model")
+    get_custom_objects().update({"softmax_v2": tf.nn.softmax})
+    model = load_model(os.path.join(MODELPATH, "model.h5"))
+
+    for i in range(3):
+        print(f"Commencing in {3-i}...")
+        sleep(1)
+
+    while True:
+        main_auto(model)
